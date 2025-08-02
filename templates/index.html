@@ -2,6 +2,13 @@
 <html>
 <head>
     <title>Todo App</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: auto; }
+        li { margin: 8px 0; display: flex; align-items: center; }
+        .done { text-decoration: line-through; color: gray; }
+        input[type="text"] { flex: 1; padding: 4px; }
+        button { margin-left: 8px; }
+    </style>
 </head>
 <body>
     <h1>Simple Todo App</h1>
@@ -14,10 +21,34 @@
     <h2>Todo List:</h2>
     <ul>
         {% for todo in todos %}
-            <li>{{ todo }}</li>
+        <li>
+            <input type="checkbox" {% if todo.done %}checked{% endif %} onchange="toggleComplete({{ todo.id }})">
+            <span class="{% if todo.done %}done{% endif %}" style="margin-left:8px; flex:1;">
+                {{ todo.task }}
+            </span>
+            <button onclick="deleteTodo({{ todo.id }})">Delete</button>
+        </li>
         {% else %}
-            <li>No todos yet!</li>
+        <li>No todos yet!</li>
         {% endfor %}
     </ul>
+
+<script>
+    function toggleComplete(id) {
+        fetch(`/todos/${id}/complete`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, task: '', done: true })
+        }).then(() => window.location.reload());
+    }
+
+    function deleteTodo(id) {
+        if (confirm('Delete this todo?')) {
+            fetch(`/todos/${id}`, {
+                method: 'DELETE'
+            }).then(() => window.location.reload());
+        }
+    }
+</script>
 </body>
 </html>
